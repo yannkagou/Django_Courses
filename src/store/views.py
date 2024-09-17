@@ -19,6 +19,10 @@ def collection_list(request):
 
     elif request.method == 'POST':
         serializer = CollectionSerializer(request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 @api_view(['GET', 'PUT', 'DELETE'])
 def collection_details(request, pk):

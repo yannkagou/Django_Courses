@@ -23,6 +23,10 @@ class ProductSerializer(serializers.ModelSerializer):
         view_name='collection-details'
     )
 
+    # collection = serializers.StringRelatedField()
+
+    # collection = CollectionSerializer()
+
     price_with_tax = serializers.SerializerMethodField(method_name='calculated_tax')
 
     def calculated_tax(self, product: Product):
