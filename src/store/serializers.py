@@ -2,7 +2,7 @@ from decimal import Decimal
 
 from rest_framework import serializers
 
-from .models import Product, Collection, Review
+from .models import Product, Collection, Review, Cart, Order, CartItem, OrderItem
 
 
 class CollectionSerializer(serializers.ModelSerializer):

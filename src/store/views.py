@@ -7,7 +7,7 @@ from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
 
-from .models import Product, Collection, Review
+from .models import Product, Collection, Review, Cart, Order, CartItem, OrderItem
 from .serializers import ProductSerializer, CollectionSerializer, ReviewSerializer
 
 
