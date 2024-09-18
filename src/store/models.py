@@ -90,3 +90,10 @@ class Address(models.Model):
     city = models.CharField(max_length=255)
     customer = models.ForeignKey(
         Customer, on_delete=models.CASCADE, related_name='addresses')
+    
+
+class Review(models.Model):
+    name = models.CharField(max_length=255)
+    description = models.TextField()
+    date = models.DateField(auto_now_add=True)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="reviews")
