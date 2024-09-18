@@ -7,8 +7,8 @@ from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
 
-from .models import Product, Collection
-from .serializers import ProductSerializer, CollectionSerializer
+from .models import Product, Collection, Review
+from .serializers import ProductSerializer, CollectionSerializer, ReviewSerializer
 
 
 # @api_view(['GET', 'POST'])
@@ -147,3 +147,23 @@ class ProductDerails(RetrieveUpdateDestroyAPIView):
         product.delete()
 
         return Response(status=status.HTTP_204_NO_CONTENT)
+    
+class ReviewList(ListCreateAPIView):
+    serializer_class = ReviewSerializer
+
+    def get_queryset(self):
+        return Review.objects.filter(product_id=self.kwargs['product_pk'])
+
+    def get_serializer_context(self):
+        return {"product_id": self.kwargs['product_pk']}
+    
+
+class ReviewDetails(RetrieveUpdateDestroyAPIView):
+    serializer_class = ReviewSerializer
+
+    def get_queryset(self):
+        return Review.objects.filter(product_id=self.kwargs['product_pk'])
+
+    def get_serializer_context(self):
+        return {"product_id": self.kwargs['product_pk']}
+    
