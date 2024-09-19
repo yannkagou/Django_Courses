@@ -8,7 +8,7 @@ from rest_framework.views import APIView
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
 
 from .models import Product, Collection, Review, Cart, Order, CartItem, OrderItem
-from .serializers import ProductSerializer, CollectionSerializer, ReviewSerializer
+from .serializers import ProductSerializer, CollectionSerializer, ReviewSerializer, CartSerializer, CartItemSerializer
 
 
 # @api_view(['GET', 'POST'])
@@ -48,23 +48,7 @@ from .serializers import ProductSerializer, CollectionSerializer, ReviewSerializ
 #         collection.delete()
 
 #         return Response(status=status.HTTP_204_NO_CONTENT)
-    
 
-class CollectionList(ListCreateAPIView):
-    queryset = Collection.objects.all()
-    serializer_class = CollectionSerializer
-
-class CollectionDetails(RetrieveUpdateDestroyAPIView):
-    queryset = Collection.objects.annotate(products_count=Count('products')).all()
-    serializer_class = CollectionSerializer
-
-    def delete(self, request, pk):
-        collection = get_object_or_404(Collection, pk=pk)
-        if collection.products.count() > 0:
-            return Response({"error": "Collection cannot be deleted because it's include one or more products."}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
-        collection.delete()
-
-        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 # @api_view(['GET', 'POST'])
@@ -129,6 +113,22 @@ class CollectionDetails(RetrieveUpdateDestroyAPIView):
 
 #         return Response(status=status.HTTP_204_NO_CONTENT)
 
+class CollectionList(ListCreateAPIView):
+    queryset = Collection.objects.all()
+    serializer_class = CollectionSerializer
+
+class CollectionDetails(RetrieveUpdateDestroyAPIView):
+    queryset = Collection.objects.annotate(products_count=Count('products')).all()
+    serializer_class = CollectionSerializer
+
+    def delete(self, request, pk):
+        collection = get_object_or_404(Collection, pk=pk)
+        if collection.products.count() > 0:
+            return Response({"error": "Collection cannot be deleted because it's include one or more products."}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+        collection.delete()
+
+        return Response(status=status.HTTP_204_NO_CONTENT)
+    
 class ProductList(ListCreateAPIView):
     queryset = Product.objects.select_related('collection').all()
     serializer_class = ProductSerializer
@@ -166,4 +166,22 @@ class ReviewDetails(RetrieveUpdateDestroyAPIView):
 
     def get_serializer_context(self):
         return {"product_id": self.kwargs['product_pk']}
+    
+
+class CartList(ListCreateAPIView):
+    queryset = Cart.objects.prefetch_related('items').all()
+    serializer_class = CartSerializer()
+
+class CartDetails(RetrieveUpdateDestroyAPIView):
+    queryset = Cart.objects.prefetch_related('items').all()
+    serializer_class = CartSerializer()
+
+class CartItemsList(ListCreateAPIView):
+    queryset = CartItem.objects.select_related('cart').all()
+    serializer_class = CartSerializer()
+
+class CartItemsDetails(RetrieveUpdateDestroyAPIView):
+    queryset = CartItem.objects.select_related('cart').all()
+    serializer_class = CartSerializer()
+
     
