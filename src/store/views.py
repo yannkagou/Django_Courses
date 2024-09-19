@@ -5,7 +5,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from rest_framework import status
 from rest_framework.views import APIView
-from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
+from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView, CreateAPIView
 
 from .models import Product, Collection, Review, Cart, Order, CartItem, OrderItem
 from .serializers import ProductSerializer, CollectionSerializer, ReviewSerializer, CartSerializer, CartItemSerializer
@@ -168,20 +168,20 @@ class ReviewDetails(RetrieveUpdateDestroyAPIView):
         return {"product_id": self.kwargs['product_pk']}
     
 
-class CartList(ListCreateAPIView):
+class CartList(CreateAPIView):
     queryset = Cart.objects.prefetch_related('items').all()
     serializer_class = CartSerializer()
 
 class CartDetails(RetrieveUpdateDestroyAPIView):
-    queryset = Cart.objects.prefetch_related('items').all()
+    queryset = Cart.objects.prefetch_related('items__product').all()
     serializer_class = CartSerializer()
 
 class CartItemsList(ListCreateAPIView):
-    queryset = CartItem.objects.select_related('cart').all()
+    queryset = CartItem.objects.select_related('product').all()
     serializer_class = CartSerializer()
 
 class CartItemsDetails(RetrieveUpdateDestroyAPIView):
-    queryset = CartItem.objects.select_related('cart').all()
+    queryset = CartItem.objects.select_related('product').all()
     serializer_class = CartSerializer()
 
     
