@@ -5,10 +5,10 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from rest_framework import status
 from rest_framework.views import APIView
-from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView, CreateAPIView
+from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView, CreateAPIView, RetrieveDestroyAPIView
 
 from .models import Product, Collection, Review, Cart, Order, CartItem, OrderItem
-from .serializers import ProductSerializer, CollectionSerializer, ReviewSerializer, CartSerializer, CartItemSerializer
+from .serializers import ProductSerializer, CollectionSerializer, ReviewSerializer, CartSerializer, CartItemSerializer, AddCartItemSerializer, UpdateCartItemSerializer
 
 
 # @api_view(['GET', 'POST'])
@@ -168,20 +168,38 @@ class ReviewDetails(RetrieveUpdateDestroyAPIView):
         return {"product_id": self.kwargs['product_pk']}
     
 
-class CartList(CreateAPIView):
-    queryset = Cart.objects.prefetch_related('items').all()
-    serializer_class = CartSerializer()
-
-class CartDetails(RetrieveUpdateDestroyAPIView):
+class CartAdd(CreateAPIView):
     queryset = Cart.objects.prefetch_related('items__product').all()
-    serializer_class = CartSerializer()
+    serializer_class = CartSerializer
+
+class CartDetails(RetrieveDestroyAPIView):
+    queryset = Cart.objects.prefetch_related('items__product').all()
+    serializer_class = CartSerializer
 
 class CartItemsList(ListCreateAPIView):
-    queryset = CartItem.objects.select_related('product').all()
-    serializer_class = CartSerializer()
+    def get_serializer_class(self):
+        if self.request.method == 'POST':
+            return AddCartItemSerializer
+        return CartItemSerializer
+
+    def get_queryset(self):
+        return CartItem.objects.filter(cart_id=self.kwargs['cart_pk']).select_related('product')
+
+    def get_serializer_context(self):
+        return {"cart_id": self.kwargs['cart_pk']}
 
 class CartItemsDetails(RetrieveUpdateDestroyAPIView):
-    queryset = CartItem.objects.select_related('product').all()
-    serializer_class = CartSerializer()
+    http_method_names = ['get', 'patch', 'delete']
+    
+    def get_serializer_class(self):
+        if self.request.method == 'PATCH':
+            return UpdateCartItemSerializer
+        return CartItemSerializer
+    
+    def get_queryset(self):
+        return CartItem.objects.filter(cart_id=self.kwargs['cart_pk']).select_related('product')
+
+    def get_serializer_context(self):
+        return {"cart_id": self.kwargs['cart_pk']}
 
     

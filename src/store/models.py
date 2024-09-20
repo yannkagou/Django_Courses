@@ -81,9 +81,9 @@ class Cart(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
 class CartItem(models.Model):
-    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='items')
-    cart = models.ForeignKey(Cart, on_delete=models.CASCADE)
-    quantity = models.PositiveSmallIntegerField()
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    cart = models.ForeignKey(Cart, on_delete=models.CASCADE, related_name='items')
+    quantity = models.PositiveSmallIntegerField(validators=[MinValueValidator(1)])
 
     class Meta:
         unique_together = [['cart', 'product']]
