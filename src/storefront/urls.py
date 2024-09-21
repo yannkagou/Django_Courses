@@ -22,6 +22,8 @@ admin.site.index_title='Yannick Admin'
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('auth/', include('djoser.urls')),
+     path('auth/', include('djoser.urls.jwt')),
     path('store/', include('store.urls')),
-    # path('tags/', include('tags.urls')),
+    path('tags/', include('tags.urls')),
 ]
