@@ -71,7 +71,6 @@ class CustomerAdmin(admin.ModelAdmin):
     search_fields = ['first_name__istartswith', 'last_name__istartswith']
     list_filter = ['membership']
     list_per_page = 10
-    list_select_related = ["user"]
     ordering = ['user__first_name', 'user__last_name']
 
     @admin.display(ordering='orders_count')
@@ -86,7 +85,7 @@ class CustomerAdmin(admin.ModelAdmin):
 
     def get_queryset(self, request):
         return super().get_queryset(request).annotate(
-            orders_count=Count('order')
+            orders_count=Count('orders')
         )
 
 
