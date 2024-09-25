@@ -116,3 +116,16 @@ class CustomerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Customer
         fields = ['id', 'user_id', 'phone', 'birth_date', 'membership']
+
+class OrderItemSerializer(serializers.ModelSerializer):
+    product = SimpleProductSerializer()
+    class Meta:
+        model = OrderItem
+        fields = ['id', 'quantity', 'unit_price', 'product']
+
+class OrderSerializer(serializers.ModelSerializer):
+    customer = CustomerSerializer
+    items = OrderItemSerializer(many=True)
+    class Meta:
+        model = Order
+        fields = ['id', 'payment_status', 'placed_at', 'customer', 'items']

@@ -6,10 +6,10 @@ from rest_framework.decorators import api_view
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView, CreateAPIView, RetrieveDestroyAPIView, RetrieveUpdateAPIView
-from rest_framework.decorators import action
+from rest_framework.permissions import IsAdminUser, IsAuthenticated, AllowAny
 
 from .models import Product, Collection, Review, Cart, Order, CartItem, OrderItem, Customer
-from .serializers import ProductSerializer, CollectionSerializer, ReviewSerializer, CartSerializer, CartItemSerializer, AddCartItemSerializer, UpdateCartItemSerializer, CustomerSerializer
+from .serializers import ProductSerializer, CollectionSerializer, ReviewSerializer, CartSerializer, CartItemSerializer, AddCartItemSerializer, UpdateCartItemSerializer, CustomerSerializer, OrderSerializer, OrderItemSerializer
 
 
 # @api_view(['GET', 'POST'])
@@ -206,12 +206,19 @@ class CartItemsDetails(RetrieveUpdateDestroyAPIView):
 class CustomerAdd(CreateAPIView):
     queryset = Customer.objects.all()
     serializer_class = CustomerSerializer
+    permission_classes = [IsAuthenticated]
 
 class CustomerDetails(RetrieveUpdateAPIView):
     queryset = Customer.objects.all()
     serializer_class = CustomerSerializer
+    
+    def get_permissions(self):
+        if self.request.method == 'GET':
+            return [AllowAny()]
+        return [IsAuthenticated()]
 
 class CurrentCustomer(APIView):
+    permission_classes = [IsAuthenticated]
     def get(self, request):
         (customer, created) = Customer.objects.get_or_create(user_id=request.user.id)
         serializer = CustomerSerializer(customer)
@@ -225,6 +232,16 @@ class CurrentCustomer(APIView):
         serializer.save()
 
         return Response(serializer.data)
+    
+class OrderList(ListCreateAPIView):
+    queryset = Order.objects.all()
+    serializer_class = OrderSerializer
+    permission_classes = [IsAuthenticated]
+
+class OrderDetail(RetrieveUpdateDestroyAPIView):
+    queryset = Order.objects.all()
+    serializer_class = OrderSerializer
+    permission_classes = [IsAuthenticated]
 
 
 
