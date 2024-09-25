@@ -5,10 +5,11 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from rest_framework import status
 from rest_framework.views import APIView
-from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView, CreateAPIView, RetrieveDestroyAPIView
+from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView, CreateAPIView, RetrieveDestroyAPIView, RetrieveUpdateAPIView
+from rest_framework.decorators import action
 
-from .models import Product, Collection, Review, Cart, Order, CartItem, OrderItem
-from .serializers import ProductSerializer, CollectionSerializer, ReviewSerializer, CartSerializer, CartItemSerializer, AddCartItemSerializer, UpdateCartItemSerializer
+from .models import Product, Collection, Review, Cart, Order, CartItem, OrderItem, Customer
+from .serializers import ProductSerializer, CollectionSerializer, ReviewSerializer, CartSerializer, CartItemSerializer, AddCartItemSerializer, UpdateCartItemSerializer, CustomerSerializer
 
 
 # @api_view(['GET', 'POST'])
@@ -201,5 +202,31 @@ class CartItemsDetails(RetrieveUpdateDestroyAPIView):
 
     def get_serializer_context(self):
         return {"cart_id": self.kwargs['cart_pk']}
+    
+class CustomerAdd(CreateAPIView):
+    queryset = Customer.objects.all()
+    serializer_class = CustomerSerializer
+
+class CustomerDetails(RetrieveUpdateAPIView):
+    queryset = Customer.objects.all()
+    serializer_class = CustomerSerializer
+
+class CurrentCustomer(APIView):
+    def get(self, request):
+        (customer, created) = Customer.objects.get_or_create(user_id=request.user.id)
+        serializer = CustomerSerializer(customer)
+
+        return Response(serializer.data)
+    
+    def put(self, request):
+        (customer, created) = Customer.objects.get_or_create(user_id=request.user.id)
+        serializer = CustomerSerializer(customer, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(serializer.data)
+
+
+
 
     

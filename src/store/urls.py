@@ -13,4 +13,7 @@ urlpatterns = [
     path('carts/<int:pk>/', views.CartDetails.as_view()),
     path('carts/<int:cart_pk>/items/', views.CartItemsList.as_view()),
     path('carts/<int:cart_pk>/items/<int:pk>/', views.CartItemsDetails.as_view()),
+    path('customers/', views.CustomerAdd.as_view()),
+    path('customers/<int:pk>/', views.CustomerDetails.as_view()),
+    path('customers/me/', views.CurrentCustomer.as_view()),
 ]
