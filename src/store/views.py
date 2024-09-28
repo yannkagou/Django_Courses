@@ -9,7 +9,7 @@ from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIV
 from rest_framework.permissions import IsAdminUser, IsAuthenticated, AllowAny
 
 from .models import Product, Collection, Review, Cart, Order, CartItem, OrderItem, Customer
-from .serializers import ProductSerializer, CollectionSerializer, ReviewSerializer, CartSerializer, CartItemSerializer, AddCartItemSerializer, UpdateCartItemSerializer, CustomerSerializer, OrderSerializer, OrderItemSerializer
+from .serializers import ProductSerializer, CollectionSerializer, ReviewSerializer, CartSerializer, CartItemSerializer, AddCartItemSerializer, UpdateCartItemSerializer, CustomerSerializer, OrderSerializer, OrderItemSerializer, CreateOrderSerializer, UpdateOrderSerializer
 
 
 # @api_view(['GET', 'POST'])
@@ -235,7 +235,7 @@ class CurrentCustomer(APIView):
     
 class OrderList(ListCreateAPIView):
     # queryset = Order.objects.all()
-    serializer_class = OrderSerializer
+    # serializer_class = OrderSerializer
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
@@ -245,11 +245,28 @@ class OrderList(ListCreateAPIView):
         
         (customer_id, created) = Customer.objects.only('id').get_or_create(user_id=user.id)
         return Order.objects.filter(customer_id=customer_id)
+    
+    def get_serializer_class(self):
+        if self.request.method == 'POST':
+            return CreateOrderSerializer
+        return OrderItemSerializer
+    
+    def create(self, request, *args, **kwargs):
+        serializer = CreateOrderSerializer(data=request.data, context={"user_id": self.request.user.id})
+        serializer.is_valid(raise_exception=True)
+        order = serializer.save()
+        serializer = OrderSerializer(order)
+        
+        return Response(serializer.data)
+    
+    # def get_serializer_context(self):
+    #     return {"user_id": self.request.user.id}
 
 class OrderDetails(RetrieveUpdateDestroyAPIView):
+    http_method_names = ['get', 'patch', 'delete', 'head', 'options']
     # queryset = Order.objects.all()
-    serializer_class = OrderSerializer
-    permission_classes = [IsAuthenticated]
+    # serializer_class = OrderSerializer
+    # permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         user = self.request.user
@@ -258,6 +275,16 @@ class OrderDetails(RetrieveUpdateDestroyAPIView):
         
         (customer_id, created) = Customer.objects.only('id').get_or_create(user_id=user.id)
         return Order.objects.filter(customer_id=customer_id)
+    
+    def get_permissions(self):
+        if self.request.method in ['PATCH', 'DELETE']:
+            return [IsAdminUser()]
+        return [IsAuthenticated()]
+    
+    def get_serializer_class(self):
+        if self.request.method == 'PATCH':
+            return UpdateOrderSerializer
+        return OrderItemSerializer
 
 
 
