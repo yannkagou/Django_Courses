@@ -220,13 +220,13 @@ class CustomerDetails(RetrieveUpdateAPIView):
 class CurrentCustomer(APIView):
     permission_classes = [IsAuthenticated]
     def get(self, request):
-        (customer, created) = Customer.objects.get_or_create(user_id=request.user.id)
+        customer = Customer.objects.get(user_id=request.user.id)
         serializer = CustomerSerializer(customer)
 
         return Response(serializer.data)
     
     def put(self, request):
-        (customer, created) = Customer.objects.get_or_create(user_id=request.user.id)
+        customer = Customer.objects.get(user_id=request.user.id)
         serializer = CustomerSerializer(customer, data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
@@ -243,13 +243,13 @@ class OrderList(ListCreateAPIView):
         if user.is_staff:
             return Order.objects.all()
         
-        (customer_id, created) = Customer.objects.only('id').get_or_create(user_id=user.id)
+        customer_id = Customer.objects.only('id').get(user_id=user.id)
         return Order.objects.filter(customer_id=customer_id)
     
     def get_serializer_class(self):
         if self.request.method == 'POST':
             return CreateOrderSerializer
-        return OrderItemSerializer
+        return OrderSerializer
     
     def create(self, request, *args, **kwargs):
         serializer = CreateOrderSerializer(data=request.data, context={"user_id": self.request.user.id})
@@ -273,7 +273,7 @@ class OrderDetails(RetrieveUpdateDestroyAPIView):
         if user.is_staff:
             return Order.objects.all()
         
-        (customer_id, created) = Customer.objects.only('id').get_or_create(user_id=user.id)
+        customer_id = Customer.objects.only('id').get(user_id=user.id)
         return Order.objects.filter(customer_id=customer_id)
     
     def get_permissions(self):
@@ -284,7 +284,7 @@ class OrderDetails(RetrieveUpdateDestroyAPIView):
     def get_serializer_class(self):
         if self.request.method == 'PATCH':
             return UpdateOrderSerializer
-        return OrderItemSerializer
+        return OrderSerializer
 
 
 
