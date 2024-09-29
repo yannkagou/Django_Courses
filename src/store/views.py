@@ -8,8 +8,8 @@ from rest_framework.views import APIView
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView, CreateAPIView, RetrieveDestroyAPIView, RetrieveUpdateAPIView
 from rest_framework.permissions import IsAdminUser, IsAuthenticated, AllowAny
 
-from .models import Product, Collection, Review, Cart, Order, CartItem, OrderItem, Customer
-from .serializers import ProductSerializer, CollectionSerializer, ReviewSerializer, CartSerializer, CartItemSerializer, AddCartItemSerializer, UpdateCartItemSerializer, CustomerSerializer, OrderSerializer, OrderItemSerializer, CreateOrderSerializer, UpdateOrderSerializer
+from .models import Product, Collection, Review, Cart, Order, CartItem, OrderItem, Customer, ProductImage
+from .serializers import ProductSerializer, CollectionSerializer, ReviewSerializer, CartSerializer, CartItemSerializer, AddCartItemSerializer, UpdateCartItemSerializer, CustomerSerializer, OrderSerializer, OrderItemSerializer, CreateOrderSerializer, UpdateOrderSerializer, ProductImageSerializer
 
 
 # @api_view(['GET', 'POST'])
@@ -131,14 +131,14 @@ class CollectionDetails(RetrieveUpdateDestroyAPIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
     
 class ProductList(ListCreateAPIView):
-    queryset = Product.objects.select_related('collection').all()
+    queryset = Product.objects.select_related('collection').prefetch_related('images').all()
     serializer_class = ProductSerializer
 
     def get_serializer_context(self):
         return {'request': self.request}
     
-class ProductDerails(RetrieveUpdateDestroyAPIView):
-    queryset = Product.objects.select_related('collection').all()
+class ProductDetails(RetrieveUpdateDestroyAPIView):
+    queryset = Product.objects.select_related('collection').prefetch_related('images').all()
     serializer_class = ProductSerializer
 
     def delete(self, request, pk):
@@ -285,6 +285,16 @@ class OrderDetails(RetrieveUpdateDestroyAPIView):
         if self.request.method == 'PATCH':
             return UpdateOrderSerializer
         return OrderSerializer
+    
+
+class ProductImageList(ListCreateAPIView):
+    serializer_class = ProductImageSerializer
+
+    def get_queryset(self):
+        return ProductImage.objects.filter(product_id=self.kwargs["product_pk"])
+    
+    def get_serializer_context(self):
+        return {"product_id": self.kwargs["product_pk"]}
 
 
 

@@ -4,7 +4,7 @@ from django.db import transaction
 
 from rest_framework import serializers
 
-from .models import Product, Collection, Review, Cart, Order, CartItem, OrderItem, Customer
+from .models import Product, Collection, Review, Cart, Order, CartItem, OrderItem, Customer, ProductImage
 
 
 class CollectionSerializer(serializers.ModelSerializer):
@@ -26,11 +26,20 @@ class ReviewSerializer(serializers.ModelSerializer):
         product_id = self.context['product_id']
         return Review.objects.create(product_id=product_id, **validated_data)
     
+class ProductImageSerializer(serializers.ModelSerializer):
+    def create(self, validated_data):
+        product_id = self.context["product_id"]
+        return ProductImage.objects.create(product_id=product_id, **validated_data)
+    class Meta:
+        model = ProductImage
+        fields = ["id", "image"]
+    
 class ProductSerializer(serializers.ModelSerializer):
     reviews = ReviewSerializer(many=True, read_only=True)
+    images = ProductImageSerializer(many=True, read_only=True)
     class Meta:
         model = Product
-        fields = ['id', 'title', 'unit_price', 'inventory', 'description', 'collection', 'price_with_tax', 'reviews']
+        fields = ['id', 'title', 'unit_price', 'inventory', 'description', 'collection', 'price_with_tax', 'reviews', 'images']
 
     collection = serializers.HyperlinkedRelatedField(
         queryset=Collection.objects.all(),
@@ -166,4 +175,3 @@ class CreateOrderSerializer(serializers.Serializer):
             OrderItem.objects.bulk_create(order_items)
             Cart.objects.filter(pk=cart_id).delete()
             return order
-    
