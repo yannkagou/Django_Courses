@@ -18,4 +18,6 @@ urlpatterns = [
     path('customers/me/', views.CurrentCustomer.as_view()),
     path('orders/', views.OrderList.as_view()),
     path('orders/<int:pk>/', views.OrderDetails.as_view()),
+    path('products/<int:product_pk>/images/', views.ProductImageList.as_view()),
+    path('products/<int:product_pk>/images/<int:pk>/', views.ProductImageDetails.as_view()),
 ]
