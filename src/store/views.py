@@ -117,6 +117,7 @@ from .serializers import ProductSerializer, CollectionSerializer, ReviewSerializ
 class CollectionList(ListCreateAPIView):
     queryset = Collection.objects.all()
     serializer_class = CollectionSerializer
+    permission_classes = [IsAdminUser]
 
 class CollectionDetails(RetrieveUpdateDestroyAPIView):
     queryset = Collection.objects.annotate(products_count=Count('products')).all()
